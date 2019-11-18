@@ -1,5 +1,6 @@
 # Bayesian multi-source regression
 
+## Citation
 Cite as: <citation information comes here>
   
 ## Description
