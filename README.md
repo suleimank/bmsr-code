@@ -3,7 +3,7 @@
 Cite as: <citation information comes here>
   
 ## Description
-Method description will to be updated on publication
+Method description will be updated on publication
 
 ## Contents
 The repository contains the following:
