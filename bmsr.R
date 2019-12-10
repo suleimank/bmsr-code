@@ -27,7 +27,7 @@ runSTAN <- function(file,data,opts)
   print("Running Stan...")
   ptm <- proc.time()
   sampling_iterations = opts$iter #best to use 1e3 or higher
-  seeds = opts$seeds #best to use 1e3 or higher
+  seeds = opts$seeds 
   if(opts$inference == "Sampling")
   {
     for(i in 1:length(seeds))
@@ -35,7 +35,7 @@ runSTAN <- function(file,data,opts)
       out = try(rstan::sampling(
         object = model, data = data, chains = 1
         , iter = sampling_iterations, warmup = sampling_iterations/2, refresh = sampling_iterations/100 #show an update @ each %10
-        , control = list(adapt_delta = 0.999), seed = seeds[i] ))
+        , control = list(adapt_delta = 0.999, max_treedepth = 20), seed = seeds[i]))
       if(class(out)!="try-error") break;
     }
   }
@@ -76,12 +76,6 @@ pred <- function(xTest.S,beta,W,yN)
     ynew = (xTest.S %*% t(beta) %*% W / nrow(W)) #same as for loop below
   else
     ynew = apply(xTest.S %*% t(beta),1,mean)
-  # ynew = array(NA,dim=c(nrow(xTest.S),ncol(W),nrow(W)))
-  # for(i in 1:nrow(W))
-  # {
-  #   ynew[,,i] = xTest.S %*% beta[i,]  %*% W[i,]
-  # }
-  # ynew = apply(ynew,c(1,2),mean)
   
   if(length(yN)>0){
     if(nrow(xTest.S)==1) {
@@ -96,15 +90,15 @@ pred <- function(xTest.S,beta,W,yN)
 predict.bmsr.stan <- function(out, xTest, nTest, yN=NULL)
 {
   post = list()
-  post$W = rstan::extract(out,"W",permuted=TRUE)
+  #post$W = rstan::extract(out,"W",permuted=TRUE)
   post$beta = rstan::extract(out,"betaT",permuted=TRUE)
   S = length(nTest)
-  yNew = matrix(NA,nrow(xTest),ncol(post$W[[1]]))
+  yNew = matrix(NA,nrow(xTest),1)
   for(s in 1:S){
     if(nTest[s]>0){
       if(s == 1) { st = 1; en = nTest[s]; }
       else { st = sum(nTest[1:(s-1)])+1 ; en = sum(nTest[1:s]); }
-      yNew[st:en,] = pred(xTest[st:en,],post$beta[[1]][,s,],post$W[[1]],yN=NULL) #yN[[s]] TODO: fix standardization
+      yNew[st:en,] = pred(xTest[st:en,],post$beta[[1]][,s,],NULL,yN=NULL)
     }
   }
   return(yNew)
@@ -120,39 +114,23 @@ getPosterior <- function(file=NULL,out)
 posterior.bmsr.stan <- function(out)
 {
   post = list()
-  post$sigma = rstan::extract(out,"sigma",permuted=TRUE); #hist(unlist(post$sigma))
+  post$sigma = rstan::extract(out,"sigma",permuted=TRUE); 
   post$sigma = apply(post$sigma[[1]],c(2),mean)
-  #estim.noise = post$sigma/apply(Y,2,sd)
   
-  post$tau = rstan::extract(out,"tauM",permuted=TRUE); #hist(unlist(post$tau))
+  post$tau = rstan::extract(out,"tauM",permuted=TRUE);
   post$tau = mean(post$tau[[1]])
   
-  post$W = rstan::extract(out,"W",permuted=TRUE); #hist(unlist(post$sigma))
-  post$W = apply(post$W[[1]],c(2),mean)
-  post$W = matrix(post$W,1,length(post$W))
+  #post$W = rstan::extract(out,"W",permuted=TRUE);
+  #post$W = apply(post$W[[1]],c(2),mean)
+  #post$W = matrix(post$W,1,length(post$W))
   
   post$beta = rstan::extract(out,"betaT",permuted=TRUE)
   post$beta = apply(post$beta[[1]],c(2,3),mean)
   
-  sc = sum(post$W);
-  post$W = post$W * 1./sc
-  post$beta = post$beta * sc
+  #sc = sum(post$W);
+  #post$W = post$W * 1./sc
+  #post$beta = post$beta * sc
   
-  # post$lambda = rstan::extract(out,"lambda",permuted=TRUE)
-  # post$lambda = t(apply(post$lambda[[1]],c(2),mean))
-  # post$tau = rstan::extract(out,"tau",permuted=TRUE)
-  # post$tau = t(apply(post$tau[[1]],c(2),mean))
-  # for(iM in 1:M) {
-  #   if(iM>1) {
-  #     sc = sd(post$lambda[,1:dXm[iM]+ sum(dXm[1:(iM-1)])])
-  #     post$lambda[,1:dXm[iM]+ sum(dXm[1:(iM-1)])] = post$lambda[,1:dXm[iM]+ sum(dXm[1:(iM-1)])] / sc
-  #     post$tau[,iM] = post$tau[,iM] * sc
-  #   } else {
-  #     sc = sd(post$lambda[,1:dXm[1]])
-  #     post$lambda[,1:dXm[iM]] = post$lambda[,1:dXm[iM]] / sc
-  #     post$tau[,iM] = post$tau[,iM] * sc
-  #   }
-  # }
   return(post)
 }
 
