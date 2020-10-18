@@ -3,12 +3,18 @@
 ## Contents
 The repository contains the following:
 
-* STAN code for Bayesian multi-source regression (BMSR)
-* R script for training and prediting from the BMSR method
-* Demo code to run the method on simulated data
-  
+* BMSR: Bayesian multi-source regression
+	* STAN code for Bayesian multi-source regression (bmsr.stan)
+	* R script for training and predicting from the BMSR method (bmsr.stan)
+	* Demo code to run the method on simulated data (demo_bmsr.stan)
+ 
+* BMSMTR: Bayesian multi-source multi-task regression
+	* STAN code for Bayesian multi-source regression (bmsmtr.stan)
+	* R script for training and predicting from the BMSR method (bmsr.stan)
+	* Demo code to run the method on simulated data (demo_bmsmtr.stan)
+
 ## Description
-Method description will be updated on publication
+Method description will be released on publication of the article.
 
 ## Citation
-Cite as: <citation information comes here>
+Cite as: To Appear <citation information comes here>

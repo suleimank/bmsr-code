@@ -1,5 +1,5 @@
-// Bayesian multi-source sparse regression
-//
+// Bayesian multi-source multi-task sparse regression
+// 
 // Citation: To Appear
 //
 // Author: Suleiman Ali Khan (c) 2019
@@ -34,6 +34,7 @@ transformed data {
 }
 
 parameters {
+  vector[dY] W;
   vector[dX] betaM;
   real<lower=0> tauM;
   matrix[S,dX] beta;
@@ -52,17 +53,17 @@ transformed parameters {
 }
 
 model{
+  W ~ normal(0,1);
   lambda ~ cauchy(0,1);
   sigma ~  inv_gamma(1,1);
-  tauM ~ cauchy(0,1);
+  tauM ~ cauchy(0,1); 
   betaM ~ normal(0,1); 
   
   for (s in 1:S){
     // beta[s] ~ normal(0.5,0.5);
     beta[s] ~ normal(0,1);
     for(d in 1:dY){
-      Y[iY[s,1]:iY[s,2],d] ~ normal(X[iY[s,1]:iY[s,2]]*(betaT[s]'),sigma[s]);
+      Y[iY[s,1]:iY[s,2],d] ~ normal(X[iY[s,1]:iY[s,2]]*(betaT[s]')*(0.5 + W[d]/2),sigma[s]);
     }
   }
 }
-

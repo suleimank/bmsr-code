@@ -104,6 +104,25 @@ predict.bmsr.stan <- function(out, xTest, nTest, yN=NULL)
   return(yNew)
 }
 
+predict.bmsmtr.stan <- function(out, xTest, nTest, yN=NULL)
+{
+  post = list()
+  post$W = rstan::extract(out,"W",permuted=TRUE)
+  post$W[[1]] = (post$W[[1]]/2 + 0.5)
+  print(dim(post$W[[1]]))
+  post$beta = rstan::extract(out,"betaT",permuted=TRUE)
+  S = length(nTest)
+  yNew = matrix(NA,nrow(xTest),dim(post$W[[1]])[2])
+  for(s in 1:S){
+    if(nTest[s]>0){
+      if(s == 1) { st = 1; en = nTest[s]; }
+      else { st = sum(nTest[1:(s-1)])+1 ; en = sum(nTest[1:s]); }
+      yNew[st:en,] = pred(xTest[st:en,],post$beta[[1]][,s,],post$W[[1]],yN=NULL)
+    }
+  }
+  return(yNew)
+}
+
 #######################################################################################################################################
 
 getPosterior <- function(file=NULL,out)
@@ -134,9 +153,48 @@ posterior.bmsr.stan <- function(out)
   return(post)
 }
 
+posterior.bmsmtr.stan <- function(out)
+{
+  post = list()
+  post$sigma = rstan::extract(out,"sigma",permuted=TRUE); 
+  post$sigma = apply(post$sigma[[1]],c(2),mean)
+  
+  post$tau = rstan::extract(out,"tauM",permuted=TRUE);
+  post$tau = mean(post$tau[[1]])
+  
+  post$W = rstan::extract(out,"W",permuted=TRUE);
+  post$W = apply(post$W[[1]],c(2),mean)
+  post$W = matrix(post$W,1,length(post$W))
+  
+  post$beta = rstan::extract(out,"betaT",permuted=TRUE)
+  post$beta = apply(post$beta[[1]],c(2,3),mean)
+  
+  sc = sum(post$W);
+  post$W = post$W * 1./sc
+  post$beta = post$beta * sc
+  
+  return(post)
+}
+
 getBeta.bmsr.stan <- function(out)
 {
   beta = rstan::extract(out,"betaT",permuted=TRUE)
   beta = t(apply(beta[[1]],c(2,3),mean))
+  return(beta)
+}
+
+getBeta.bmsmtr.stan <- function(out)
+{
+  beta = rstan::extract(out,"betaT",permuted=TRUE)
+  beta = t(apply(beta[[1]],c(2,3),mean))
+  
+  W = rstan::extract(out,"W",permuted=TRUE);
+  W = apply(W[[1]],c(2),mean)
+  W = matrix(W,1,length(W))
+  
+  sc = sum(W);
+  W = W * 1./sc
+  beta = beta * sc
+  
   return(beta)
 }
