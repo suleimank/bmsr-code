@@ -9,8 +9,8 @@ The repository contains the following:
 	* Demo code to run the method on simulated data (demo_bmsr.stan)
  
 * BMSMTR: Bayesian multi-source multi-task regression
-	* STAN code for Bayesian multi-source regression (bmsmtr.stan)
-	* R script for training and predicting from the BMSR method (bmsr.stan)
+	* STAN code for Bayesian multi-source multi-task regression (bmsmtr.stan)
+	* R script for training and predicting from the BMSMTR method (bmsr.stan)
 	* Demo code to run the method on simulated data (demo_bmsmtr.stan)
 
 ## Description
