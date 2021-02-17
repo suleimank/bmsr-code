@@ -107,6 +107,9 @@ g <- ggplot(data = df, aes(x = ypred, y = yobs)) + geom_point() + xlab("Predicte
 posteriorFunction = paste0("posterior.",model.file);
 post = getPosterior(posteriorFunction,out)
 
+betaShared = as.numeric(post$betaShared)
+names(betaShared) <- features
+
 # Plot the posterior betas
 df <- data.frame(gene = features, dataset1 = post$beta[1,], dataset2 = post$beta[2,])
 g <- ggplot(data = df, aes(x = dataset1, y = dataset2)) + geom_point()

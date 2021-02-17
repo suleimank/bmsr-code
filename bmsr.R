@@ -135,7 +135,7 @@ posterior.bmsr.stan <- function(out)
   post = list()
   post$sigma = rstan::extract(out,"sigma",permuted=TRUE); 
   post$sigma = apply(post$sigma[[1]],c(2),mean)
-  
+
   post$tau = rstan::extract(out,"tauM",permuted=TRUE);
   post$tau = mean(post$tau[[1]])
   
@@ -145,6 +145,12 @@ posterior.bmsr.stan <- function(out)
   
   post$beta = rstan::extract(out,"betaT",permuted=TRUE)
   post$beta = apply(post$beta[[1]],c(2,3),mean)
+
+  tau0M = rstan::extract(out,"tau0M",permuted=TRUE)[[1]];
+  tauM = rstan::extract(out,"tauM",permuted=TRUE)[[1]];  
+  lambda = rstan::extract(out,"lambda",permuted=TRUE)[[1]];  
+  betaM = rstan::extract(out,"betaM",permuted=TRUE)[[1]];
+  post$betaShared <- t(lambda * betaM) %*% (tauM * tau0M)
   
   #sc = sum(post$W);
   #post$W = post$W * 1./sc
