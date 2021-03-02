@@ -1,6 +1,3 @@
-#source("HelpingFunctions.R")
-
-
 #####################################
 ###### Sorting Functions ############
 #####################################
@@ -24,6 +21,19 @@ na.omit.print <- function(x) { a = na.omit(x); print(a[1:nrow(a),]) }
 #####################################
 ###### Normalization Functions ######
 #####################################
+
+#'  z-transform a training data matrix
+#'
+#' \code{ztransform} performs column-wise mean=0 and sd=1 normalization of a matrix for all columns starting from \code{FFSC}
+#'
+#' @param mat matrix to z-transform
+#' @param FFSC the index of first column to standardize. All columns including this and after are normalized. 
+#' @param verbose print logs or not. Defaults to FALSE. 
+#' @return a list containing the following:
+#'  \item{mat} column-wise z-transformed matrix.
+#'  \item{cm} vector of column means used for z-transform.
+#'  \item{cs} vector of column standard deviations used for z-transform.
+#' @export
 ztransform <- function(mat, FFSC,verbose=FALSE){
   cmat = ncol(mat)
   rmat = nrow(mat)
@@ -54,36 +64,45 @@ ztransform <- function(mat, FFSC,verbose=FALSE){
   return(list(mat=mat,cm=cm,cs=cs))
 }
 
+#'  z-transform a test data matrix using column means and column standard deviations from training data matrix
+#'
+#' \code{ztransformTest} performs column-wise mean=0 and sd=1 normalization of a test matrix for all columns starting from \code{FFSC}
+#'
+#' @param mat matrix to z-transform
+#' @param FFSC the index of first column to standardize. All columns including this and after are normalized. 
+#' @param cm vector of column means used for z-transform.
+#' @param cs vector of column standard deviations used for z-transform.
+#' @param verbose print logs or not. Defaults to FALSE. 
+#' @return a list containing the following:
+#'  \item{mat} column-wise z-transformed matrix.
+#' @export
 ztransformTest <- function(mat, FFSC, cm, cs, verbose=FALSE){
   cmat = ncol(mat)
   rmat = nrow(mat)
   if(cmat==1)
   {
-    #cm = apply(mat,2,mean.na)
     if(verbose) print(paste("Number of Z Normalized Features(COLUMNS) is:",length(cm)));
     if(sum(is.na(mat)) >= (length(mat)-1) ) cm = 0
     mat = mat - cm
-    #cs = apply(mat,2,sd.na)
-    #cs[cs == 0] = 1
     mat = mat/cs
     return(list(mat=mat,cm=cm,cs=cs))
   }
-  #cm = apply(mat[,FFSC:cmat],2,mean.na)
-  #lm = apply(mat[,FFSC:cmat],2,length.na)
-  #inds = which(lm==1)
-  #if(length(inds)>0)
-  #  cm[inds] = 0
   if(verbose) print(paste("Number of Z Normalized Features(COLUMNS) is:",length(cm)));
   mat[,FFSC:cmat] = mat[,FFSC:cmat] - matrix(cm,rmat,(cmat-FFSC+1),byrow=TRUE)
-  #cs = apply(mat[,FFSC:cmat],2,sd.na)
-  #cs[cs == 0] = 1
-  #inds = which(is.na(cs))
-  #if(length(inds)>0)
-  #  cs[inds] = 1
   mat[,FFSC:cmat] = mat[,FFSC:cmat]/matrix(cs,rmat,(cmat-FFSC+1),byrow=TRUE)
   return(list(mat=mat,cm=cm,cs=cs))
 }
 
+#'  mean normalize a data matrix
+#'
+#' \code{meanNorm} performs column-wise mean=0 normalization of a matrix for all columns starting from \code{FFSC}
+#'
+#' @param mat matrix to mean normalize
+#' @param FFSC the index of first column to standardize. All columns including this and after are normalized. 
+#' @param verbose print logs or not. Defaults to FALSE. 
+#' @return a list containing the following:
+#'  \item{mat} column-wise mean normalized matrix.
+#'  \item{cm} vector of column means used for mean normalization.
 meanNorm <- function(mat, FFSC,verbose=FALSE){
   cmat = ncol(mat)
   rmat = nrow(mat)
@@ -105,9 +124,16 @@ meanNorm <- function(mat, FFSC,verbose=FALSE){
   return(list(mat=mat,cm=cm))
 }
 
-#
-# 19.04.2016: Updated varNorm form correct $cm. 
-#
+#'  variance normalize a data matrix
+#'
+#' \code{varNorm} performs column-wise standard-deviation=1 normalization of a matrix for all columns starting from \code{FFSC}
+#'
+#' @param mat matrix to variance normalize normalize
+#' @param FFSC the index of first column to standardize. All columns including this and after are normalized. 
+#' @param verbose print logs or not. Defaults to FALSE. 
+#' @return a list containing the following:
+#'  \item{mat} column-wise variance normalized matrix.
+#'  \item{cs} vector of column standard deviations used for variance normalization.
 varNorm <- function(mat, FFSC){
   cmat = ncol(mat)
   rmat = nrow(mat)
