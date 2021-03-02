@@ -18,15 +18,17 @@ require("rstan")
 #' @export
 runSTAN <- function(file,data,opts)
 {
-  ml = try(load(file))
-  if(class(ml)== "try-error"){
-    print("Compiling Stan...")
-    model = rstan::stan_model(file=list.files(pattern=file))
-  }
+  #ml = try(load(file))
+  #if(class(ml)== "try-error"){
+  print("Compiling Stan Model")
+  model = rstan::stan_model(file=list.files(pattern=file))
+  #}
   
-  print("Running Stan...")
+  print("Training Stan Model")
   ptm <- proc.time()
-  sampling_iterations = opts$iter #best to use 1e3 or higher
+  if(opts$iter < 1e3)
+    print(paste('Iterations >= 1e3 recommended, currently set to:',opts$iter))
+  sampling_iterations = opts$iter
   seeds = opts$seeds 
   if(opts$inference == "Sampling")
   {
