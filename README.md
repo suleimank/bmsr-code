@@ -14,7 +14,10 @@ The repository contains the following:
 	* Demo code to run the method on simulated data (demo_bmsmtr.stan)
 
 ## Description
-Method description will be released on publication of the article.
+The bmsr package implements joint regression from multiple data sources in a Bayesian framework. The package provides implementation for both single-task and multi-task regression. The model is implemented using STAN and interface is provided using R programming language. Options for training the model using both NUTS sampler and variational inference are provided. The package is structured for ease of use and the included demo shows the model execution on real-life as well as simulated datasets.
+
+## R-package
+For an Installable package see [R-package](https://github.com/suleimank/bmsr) 
 
 ## Citation
 Cite as: To Appear <citation information comes here>
